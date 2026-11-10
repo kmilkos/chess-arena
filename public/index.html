@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chess Arena — AI Grandmaster &amp; Tactical Coach</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top Header -->
+    <header class="top-bar">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">♞</div>
+        <div>
+          <h1 class="brand-title">Chess Arena</h1>
+          <p class="brand-subtitle">AI Grandmaster &amp; Tactical Coach</p>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="toolbar-actions">
+          <label class="theme-picker-label" for="board-theme-select">
+            <span class="sr-only">Board Theme</span>
+            <select id="board-theme-select" class="select-compact" aria-label="Chessboard theme">
+              <option value="emerald">Tournament Emerald</option>
+              <option value="walnut">Classic Walnut</option>
+              <option value="obsidian">Midnight Obsidian</option>
+              <option value="slate">Slate &amp; Ivory</option>
+            </select>
+          </label>
+
+          <button type="button" id="sound-toggle-btn" class="btn btn-icon" aria-label="Toggle sound effects" title="Toggle Sound">
+            <span id="sound-icon">🔊</span>
+          </button>
+
+          <button type="button" id="new-game-top-btn" class="btn btn-primary">
+            ♟ New Game
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main 2-Column Arena (Board Stage with Left Players/Controls + Right Telemetry) -->
+    <main class="arena-grid">
+      <!-- Left/Center: Player Cards & In-Game Controls (Left of Board) + Evaluation Bar + Chessboard -->
+      <section class="board-stage" aria-label="Chessboard Arena">
+        <!-- Players & Tactical Controls Column on the Left of the Board -->
+        <div class="players-column" aria-label="Players and Tactical Controls">
+          <!-- Top Player Card -->
+          <div class="player-bar" id="top-player-bar">
+            <div class="player-identity">
+              <div class="player-avatar" id="top-player-avatar">♚</div>
+              <div class="player-meta-text">
+                <div class="player-name-row">
+                  <span class="player-name" id="top-player-name">Computer AI</span>
+                  <span class="model-tag" id="top-player-tag">gemini-3.8-flash-medium</span>
+                </div>
+                <div class="captured-row">
+                  <span class="captured-pieces" id="top-captured"></span>
+                  <span class="material-badge hidden" id="top-material-adv"></span>
+                </div>
+              </div>
+            </div>
+            <div class="player-status-right">
+              <div class="clock-pill" id="top-clock">00:00</div>
+              <span class="thinking-badge hidden" id="top-thinking-badge">
+                <span class="spinner"></span> Player is thinking…
+              </span>
+            </div>
+          </div>
+
+          <!-- Compact In-Game Tactical Controls & FEN Box -->
+          <div class="in-game-controls-card">
+            <button type="button" id="ai-pause-btn" class="btn btn-secondary btn-block hidden">
+              ⏸ Pause AI Battle
+            </button>
+
+            <div class="control-buttons-grid">
+              <button type="button" id="coach-hint-btn" class="btn btn-coach" title="Ask Grandmaster Coach for advice">
+                💡 AI Coach
+              </button>
+              <button type="button" id="undo-move-btn" class="btn btn-secondary" title="Take back last turn">
+                ↩ Undo
+              </button>
+              <button type="button" id="flip-board-btn" class="btn btn-secondary" title="Flip board orientation">
+                ⇅ Flip
+              </button>
+              <button type="button" id="force-ai-move-btn" class="btn btn-secondary" title="Have AI play the current turn">
+                ⚡ AI Turn
+              </button>
+            </div>
+
+            <div class="fen-box">
+              <input type="text" id="fen-input" class="form-input" readonly aria-label="Current FEN string" />
+              <div class="fen-actions">
+                <button type="button" id="copy-fen-btn" class="btn btn-xs">Copy FEN</button>
+                <button type="button" id="copy-pgn-btn" class="btn btn-xs">Copy PGN</button>
+                <button type="button" id="open-fen-modal-btn" class="btn btn-xs">Load FEN</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Player Card -->
+          <div class="player-bar" id="bottom-player-bar">
+            <div class="player-identity">
+              <div class="player-avatar" id="bottom-player-avatar">♔</div>
+              <div class="player-meta-text">
+                <div class="player-name-row">
+                  <span class="player-name" id="bottom-player-name">You (White)</span>
+                  <span class="model-tag" id="bottom-player-tag">Human</span>
+                </div>
+                <div class="captured-row">
+                  <span class="captured-pieces" id="bottom-captured"></span>
+                  <span class="material-badge hidden" id="bottom-material-adv"></span>
+                </div>
+              </div>
+            </div>
+            <div class="player-status-right">
+              <div class="clock-pill" id="bottom-clock">00:00</div>
+              <span class="turn-status-pill" id="turn-status-pill">White to move</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Board + Eval Bar Row -->
+        <div class="board-and-eval">
+          <div class="eval-bar-container" title="Position Evaluation (White vs Black)">
+            <div class="eval-bar-fill" id="eval-bar-fill"></div>
+            <span class="eval-score-label" id="eval-score-label">0.0</span>
+          </div>
+
+          <div class="board-frame" id="board-frame" data-theme="emerald">
+            <div class="chessboard" id="chessboard" role="grid" aria-label="Chessboard"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Sidebar: AI Thought Stream & Move History -->
+      <aside class="panel telemetry-panel" aria-label="AI Reasoning and Move History">
+        <!-- AI Thought & Telemetry Card -->
+        <div class="subpanel thought-subpanel">
+          <div class="panel-header">
+            <h2 class="panel-title">AI Reasoning</h2>
+            <span class="telemetry-latency" id="last-move-latency">Ready</span>
+          </div>
+
+          <div class="telemetry-metrics-row" id="telemetry-metrics-row">
+            <div class="metric-chip">
+              <span class="metric-label">Active Model</span>
+              <span class="metric-value" id="metric-model">gemini-3.8-flash-medium</span>
+            </div>
+            <div class="metric-chip">
+              <span class="metric-label">Eval</span>
+              <span class="metric-value" id="metric-eval">+0.00</span>
+            </div>
+            <div class="metric-chip">
+              <span class="metric-label">Tokens</span>
+              <span class="metric-value" id="metric-tokens">—</span>
+            </div>
+          </div>
+
+          <div class="thought-log" id="thought-log">
+            <div class="thought-entry thought-welcome">
+              <div class="thought-meta">
+                <span class="thought-badge">Grandmaster Engine</span>
+                <span>Live Analysis</span>
+              </div>
+              <p class="thought-text">
+                Make a move on the board or click <strong>AI Coach</strong> to stream live tactical analysis and move reasoning.
+              </p>
+            </div>
+          </div>
+
+          <!-- Candidate Moves Mini-Table -->
+          <div class="candidates-box" id="candidates-box">
+            <div class="candidates-header">
+              <span>Top Tactical Candidates Evaluated</span>
+            </div>
+            <div class="candidates-list" id="candidates-list">
+              <span class="candidates-empty">Waiting for first AI calculation…</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Move History PGN Card -->
+        <div class="subpanel history-subpanel">
+          <div class="panel-header">
+            <h2 class="panel-title">Move History</h2>
+            <span class="move-counter-badge" id="move-counter-badge">Move 1</span>
+          </div>
+
+          <div class="move-history-scroll" id="move-history-scroll">
+            <table class="move-table" aria-label="Recorded chess moves">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>White</th>
+                  <th>Black</th>
+                </tr>
+              </thead>
+              <tbody id="move-history-body">
+                <tr class="empty-row">
+                  <td colspan="3">No moves played yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <!-- Native Modal Dialog: Match Setup (opened on New Game) -->
+  <dialog id="setup-dialog" aria-labelledby="setup-dialog-title" closedby="any">
+    <div class="panel-header">
+      <h2 id="setup-dialog-title" class="dialog-title">Match &amp; Engine Setup</h2>
+      <span class="badge badge-accent" id="game-mode-badge">Human vs AI</span>
+    </div>
+
+    <div class="form-group">
+      <label for="game-mode-select" class="form-label">Game Mode</label>
+      <select id="game-mode-select" class="form-select">
+        <option value="hvai">Human vs. Computer AI</option>
+        <option value="aivai">AI vs. AI (Watch Battle)</option>
+        <option value="hvh">Local Pass &amp; Play (2 Players)</option>
+      </select>
+    </div>
+
+    <div class="form-group" id="player-color-group">
+      <span class="form-label">Play As</span>
+      <div class="segmented-control" role="group" aria-label="Choose your piece color">
+        <button type="button" class="seg-btn active" data-color="w">♔ White</button>
+        <button type="button" class="seg-btn" data-color="random">🎲 Random</button>
+        <button type="button" class="seg-btn" data-color="b">♚ Black</button>
+      </div>
+    </div>
+
+    <div class="form-group" id="primary-ai-group">
+      <label for="ai-model-select" class="form-label" id="primary-ai-label">Computer AI Model</label>
+      <select id="ai-model-select" class="form-select"></select>
+      <p class="form-hint" id="ai-model-desc">Select which AI model calculates computer moves.</p>
+    </div>
+
+    <div class="form-group hidden" id="secondary-ai-group">
+      <label for="ai-model-white-select" class="form-label">White AI Model</label>
+      <select id="ai-model-white-select" class="form-select"></select>
+    </div>
+
+    <div class="form-group" id="difficulty-group">
+      <label for="difficulty-select" class="form-label">Engine Style &amp; Strength</label>
+      <select id="difficulty-select" class="form-select">
+        <option value="grandmaster">Grandmaster (Deep Tactical + Positional)</option>
+        <option value="tactical">Aggressive Tactician (Sharp Attacks)</option>
+        <option value="casual">Club Player (Natural &amp; Creative)</option>
+      </select>
+    </div>
+
+    <form method="dialog" class="dialog-actions">
+      <button type="submit" value="cancel" class="btn btn-secondary">Cancel</button>
+      <button type="button" id="start-match-btn" class="btn btn-primary" autofocus>
+        ♟ Start New Game
+      </button>
+    </form>
+  </dialog>
+
+  <!-- Native Modal Dialog: Pawn Promotion (Rule 1 from modern-web-guidance: no role="dialog" or aria-modal) -->
+  <dialog id="promotion-dialog" aria-labelledby="promotion-dialog-title" closedby="none">
+    <h2 id="promotion-dialog-title" class="dialog-title">Promote Pawn</h2>
+    <p class="dialog-subtitle">Choose a piece to promote your pawn:</p>
+    <div class="promotion-grid" id="promotion-choices">
+      <button type="button" class="promo-btn" data-piece="q" autofocus>
+        <span class="promo-icon" id="promo-q">♕</span>
+        <span>Queen</span>
+      </button>
+      <button type="button" class="promo-btn" data-piece="r">
+        <span class="promo-icon" id="promo-r">♖</span>
+        <span>Rook</span>
+      </button>
+      <button type="button" class="promo-btn" data-piece="b">
+        <span class="promo-icon" id="promo-b">♗</span>
+        <span>Bishop</span>
+      </button>
+      <button type="button" class="promo-btn" data-piece="n">
+        <span class="promo-icon" id="promo-n">♘</span>
+        <span>Knight</span>
+      </button>
+    </div>
+  </dialog>
+
+  <!-- Native Modal Dialog: Load Custom FEN -->
+  <dialog id="fen-dialog" aria-labelledby="fen-dialog-title" closedby="any">
+    <h2 id="fen-dialog-title" class="dialog-title">Load Position from FEN</h2>
+    <p class="dialog-subtitle">Paste a valid FEN string below to jump to any chess position:</p>
+    <form method="dialog" id="fen-dialog-form">
+      <input
+        type="text"
+        id="custom-fen-input"
+        class="form-input"
+        placeholder="rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
+        autofocus
+      />
+      <p class="dialog-error hidden" id="fen-error-msg">Invalid FEN position.</p>
+      <div class="dialog-actions">
+        <button type="submit" value="cancel" class="btn btn-secondary">Cancel</button>
+        <button type="button" id="apply-fen-btn" class="btn btn-primary">Load Position</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Native Modal Dialog: Game Over Summary -->
+  <dialog id="gameover-dialog" aria-labelledby="gameover-title" closedby="any">
+    <div class="gameover-header">
+      <div class="gameover-trophy" id="gameover-icon">🏆</div>
+      <h2 id="gameover-title" class="dialog-title">Checkmate!</h2>
+      <p id="gameover-subtitle" class="dialog-subtitle">White wins by checkmate.</p>
+    </div>
+    <div class="gameover-stats" id="gameover-stats"></div>
+    <form method="dialog" class="dialog-actions">
+      <button type="submit" value="close" class="btn btn-secondary">Inspect Board</button>
+      <button type="button" id="gameover-rematch-btn" class="btn btn-primary" autofocus>Play Again</button>
+    </form>
+  </dialog>
+
+  <!-- Toast Notification Banner -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

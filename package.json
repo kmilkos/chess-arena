@@ -1,0 +1,13 @@
+{
+  "name": "chess-arena",
+  "version": "1.0.0",
+  "description": "Interactive Chess Web App with Multi-Model AI Computer Player & Coach",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "chess.js": "^1.0.0"
+  }
+}
