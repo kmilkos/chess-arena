@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Piece Sets & Visual Settings — Chess Arena</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell settings-shell">
+      <!-- Top Header Bar (Stitch Grandmaster Obsidian Design) -->
+      <header class="top-bar">
+        <div class="brand">
+          <a href="/" class="brand-logo" aria-label="Back to Chess Arena" style="text-decoration: none; color: inherit;">♟</a>
+          <div>
+            <h1 class="brand-title">Chess Arena · Piece Sets &amp; Settings</h1>
+            <p class="brand-subtitle">10 Curated Cartoon, Movie &amp; Game Piece Sets · Live Inspector</p>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <div class="toolbar-actions">
+            <span id="active-set-header-pill" class="badge badge-accent" style="font-size: 0.88rem; padding: 0.4rem 0.85rem;">
+              Equipped: Classic Grandmaster
+            </span>
+            <a href="/" class="btn btn-secondary" style="text-decoration: none;">
+              ← Back to Chessboard
+            </a>
+            <button id="btn-save-settings-top" type="button" class="btn btn-primary">
+              ✓ Save & Apply to Board
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main 2-Column Stitch Settings Layout -->
+      <main class="settings-grid">
+        <!-- Left/Center Gallery Stage -->
+        <section class="settings-gallery-stage">
+          <!-- Search, Filter Tabs & Perspective Switcher -->
+          <div class="panel settings-filter-bar">
+            <div class="settings-search-row">
+              <div class="search-input-wrap">
+                <input
+                  id="set-search-input"
+                  type="search"
+                  class="form-input"
+                  placeholder="Search themes, movies, cartoons, games, or piece names (e.g. Lightsaber, Triforce, Donut, Creeper)..."
+                />
+              </div>
+
+              <div class="perspective-toggle-group" role="group" aria-label="Piece Preview Perspective">
+                <button type="button" class="seg-btn active" data-perspective="split">Dual Split View</button>
+                <button type="button" class="seg-btn" data-perspective="w">White Faction</button>
+                <button type="button" class="seg-btn" data-perspective="b">Black Faction</button>
+              </div>
+            </div>
+
+            <div id="category-pills" class="category-pills-row">
+              <button type="button" class="cat-pill active" data-category="all">All Piece Sets (10)</button>
+              <button type="button" class="cat-pill" data-category="movies">🎬 Movies & Sci-Fi / Fantasy (3)</button>
+              <button type="button" class="cat-pill" data-category="games">🎮 Video Games (3)</button>
+              <button type="button" class="cat-pill" data-category="cartoons">📺 Cartoons, Anime & Comics (3)</button>
+              <button type="button" class="cat-pill" data-category="classic">♔ Classic Tournament (1)</button>
+            </div>
+          </div>
+
+          <!-- 10 Piece Sets Grid -->
+          <div id="piece-sets-grid" class="piece-sets-grid"></div>
+        </section>
+
+        <!-- Right Sticky Live Piece Set Inspector & Visual Options -->
+        <aside class="panel settings-inspector-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Live Piece Inspector</h2>
+              <p class="form-hint">Click any square on the demo board to test piece selection & audio</p>
+            </div>
+            <span id="inspector-active-badge" class="badge badge-accent">Live Preview</span>
+          </div>
+
+          <!-- Interactive 4x4 Tactical Sandbox Board -->
+          <div class="inspector-board-card">
+            <div class="inspector-board-header">
+              <span id="inspector-faction-vs" class="inspector-faction-label">White vs Black</span>
+              <select id="demo-scenario-select" class="select-compact" style="width: auto;">
+                <option value="midgame">Tactical Midgame (All 6 Roles)</option>
+                <option value="royals">Royal Stand-Off</option>
+                <option value=" vanguard">Pawn & Knight Vanguard</option>
+              </select>
+            </div>
+
+            <div id="inspector-board-frame" class="board-frame inspector-board-frame" data-theme="emerald">
+              <div id="inspector-board" class="inspector-chessboard" role="grid" aria-label="Live Piece Preview Board"></div>
+            </div>
+          </div>
+
+          <!-- Fine-Grained Visual & Audio Options -->
+          <div class="inspector-controls-stack">
+            <!-- Option 1: Piece Geometric Scale -->
+            <div class="form-group">
+              <div class="panel-header">
+                <label class="form-label" for="opt-piece-scale">Piece Geometric Scale</label>
+                <span id="opt-piece-scale-val" class="badge badge-accent">92%</span>
+              </div>
+              <input
+                id="opt-piece-scale"
+                type="range"
+                min="76"
+                max="104"
+                step="2"
+                value="92"
+                class="range-slider"
+              />
+              <div class="range-labels">
+                <span>76% Compact</span>
+                <span>92% Balanced</span>
+                <span>104% Oversized</span>
+              </div>
+            </div>
+
+            <!-- Option 2: Silhouette & Glow FX -->
+            <div class="form-group">
+              <label class="form-label">Piece Silhouette & Glow FX</label>
+              <div id="opt-glow-group" class="glow-options-grid">
+                <button type="button" class="seg-btn active" data-glow="crisp">✒️ Crisp Stroke</button>
+                <button type="button" class="seg-btn" data-glow="neon">⚡ Neon Glow</button>
+                <button type="button" class="seg-btn" data-glow="shadow3d">🛡️ 3D Shadow</button>
+                <button type="button" class="seg-btn" data-glow="cartoon">🎨 Cartoon Ink</button>
+              </div>
+            </div>
+
+            <!-- Option 3: Faction Swap & Role Sub-Badges -->
+            <div class="form-group">
+              <label class="form-label">Faction & Readability Options</label>
+              <div class="toggle-checks-row">
+                <label class="check-card">
+                  <input id="opt-swap-factions" type="checkbox" />
+                  <span>Swap White / Black Faction Palettes</span>
+                </label>
+                <label class="check-card">
+                  <input id="opt-role-badges" type="checkbox" />
+                  <span>Show Role Sub-Badge (K/Q/R/B/N/P) on Board Squares</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Option 4: Board Surface Theme Pairing -->
+            <div class="form-group">
+              <label class="form-label" for="opt-board-theme">Board Surface Theme Pairing</label>
+              <select id="opt-board-theme" class="form-select">
+                <option value="emerald">Emerald Tournament</option>
+                <option value="walnut">Classic Walnut Wood</option>
+                <option value="obsidian">Midnight Obsidian</option>
+                <option value="slate">Arctic Slate</option>
+                <option value="cyber">Cyber Synthwave Grid</option>
+                <option value="volcanic">Volcanic Nether Stone</option>
+              </select>
+            </div>
+
+            <!-- Option 5: Capture Animation & VFX -->
+            <div class="form-group">
+              <label class="form-label" for="opt-capture-vfx">Piece Capture Effect & VFX</label>
+              <select id="opt-capture-vfx" class="form-select">
+                <option value="shatter">Shatter & Crystal Flash</option>
+                <option value="laser">Laser Pulse Highlight</option>
+                <option value="comic">Comic Impact Ring</option>
+                <option value="subtle">Subtle Tournament Highlight</option>
+              </select>
+            </div>
+
+            <!-- Option 6: Sound Effects Pack & Audition -->
+            <div class="form-group">
+              <div class="panel-header">
+                <label class="form-label" for="opt-sound-pack">Sound Effects Pack</label>
+                <button id="btn-test-sound" type="button" class="btn btn-xs">🔊 Test Sound</button>
+              </div>
+              <select id="opt-sound-pack" class="form-select">
+                <option value="auto">Auto (Match Selected Piece Set)</option>
+                <option value="wood">Classic Walnut Wood</option>
+                <option value="laser">Heavy Laser & Sci-Fi Hum</option>
+                <option value="orchestral">Epic Fantasy Horn & Blade</option>
+                <option value="8bit">8-Bit Retro Chime</option>
+                <option value="ocarina">Sacred Ocarina Echoes</option>
+                <option value="noir">Midnight Grapple & Thunder</option>
+                <option value="anime">Anime Battle Spark</option>
+                <option value="voxel">Voxel Anvil & Pickaxe</option>
+                <option value="toon">Cartoon Boing & Horn</option>
+                <option value="mecha">Hydraulic Mecha Servo</option>
+              </select>
+            </div>
+          </div>
+
+          <hr class="divider" />
+
+          <!-- Sticky Inspector Footer Actions -->
+          <div class="action-grid">
+            <button id="btn-equip-apply" type="button" class="btn btn-primary btn-block">
+              ✓ Save & Return to Chessboard
+            </button>
+            <button id="btn-reset-defaults" type="button" class="btn btn-secondary btn-block">
+              Reset to Classic Defaults
+            </button>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+    <script type="module" src="/settings.js"></script>
+  </body>
+</html>
